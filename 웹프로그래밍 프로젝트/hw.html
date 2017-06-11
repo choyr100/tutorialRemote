@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Web Diary</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdn.ckeditor.com/4.7.0/standard/ckeditor.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<style>
+		a{
+			display: block;
+		}
+		.textnode{
+			border: 1px solid black;
+		}
+		form{
+			display: block;
+			margin: auto;
+			width: 100%;
+		}
+		.hashtagbutton{
+			display: block;
+			margin: auto;
+			width: 100%;
+		}
+		.createbutton{
+			display: block;
+			margin: auto;
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+	<form>
+    
+  	</form>
+
+ 
+  <script>
+  getheight = 0;
+  	var config = {
+		    apiKey: "AIzaSyCIXG-PZW5QJGJQIqEj9bg4NfL6XMoxuJs",
+		    authDomain: "fir-34038.firebaseapp.com",
+		    databaseURL: "https://fir-34038.firebaseio.com",
+		    projectId: "fir-34038",
+		    storageBucket: "fir-34038.appspot.com",
+		    messagingSenderId: "153331800035"
+		  };
+		firebase.initializeApp(config);
+
+	$(document).ready(function(){
+
+
+		get();
+
+		$(".textnode").css({height:getheight + "px"});
+		console.log(getheight);
+
+	});
+
+	function create(){
+		var text = "<div class='row'>" + "<div class='col-xs-12 col-sm-12'>" + "<input class='col-xs-12 col-sm-12' type='text' name='' id='title'>" + "<textarea name='editor1' id='txt'></textarea>" + "<script>" + "CKEDITOR.replace( 'editor1' );" + "</" + "script>" + "<div class='form-group'>" + "<label for='exampleInputFile'>File input</label>" + "<input type='file' id='exampleInputFile'>" + "<p class='help-block'>Example block-level help text here.</p>" + "</div>" + "<input class='col-xs-12 col-sm-12' placeholder='HashTag #때고 입력하세요' type='text' id='hashtaginput'>" + "<input type='button' class='btn btn-primary' value='저장'' onclick='save();'></input>" + "<input type='button' class='btn btn-primary' value='취소'' onclick='get();'></input>" + "</div>";
+		$("form").html(text);
+		$(".bodydivtxt").html("");
+		
+	}
+
+	function deletenode(num){
+
+		let txtTime = document.getElementById("txtdiv"+num).getElementsByTagName("h5");
+		var currentTime = txtTime[0].innerHTML;
+
+
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + ".json",
+  			method : "PUT",
+  			data : JSON.stringify(null),
+  			success : function(data) {
+  				get();
+  			}
+  		});
+
+	}
+
+	function hashtagbutton(){
+		if(document.getElementById("hashtag").value <= 0)
+		{
+			get();
+		}
+		else
+		{
+			let bodydiv = document.createElement("div");
+		  	bodydiv.className = "bodydivtxt row row-eq-height"
+		  	$(".bodydivtxt").detach();
+		  	$("body").append(bodydiv);
+			for(var i = gethash.length - 1; i >= 0; i--)
+			{
+				if(document.getElementById("hashtag").value == gethash[i])
+				{
+					let div = document.createElement("div");
+		  				div.id = "txtdiv" + i;
+		  				div.className = "textnode col-xs-12 col-md-6 panel";
+		  				texttxt = "";
+		  				if(getfileName[i] == null || getfileName[i] == undefined)
+		  				{
+		  					if(gethash[i]==null || gethash[i]==undefined)
+		  					{
+		  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+		  					}
+		  					else
+		  					{
+		  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+		  					}
+		  				}
+		  				else
+		  				{
+		  					var donwurl = "";
+		  					var gsReference = storage.refFromURL("gs://fir-34038.appspot.com/" + getTime[i] + "/" + getfileName[i]);
+		  					if(gethash[i]==null || gethash[i]==undefined)
+		  					{
+		  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+		  					}
+		  					else
+		  					{
+		  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+		  					}
+		  					gsReference.getDownloadURL().then(function(url){
+		  						donwurl = "<a id='" + getTime[i] + "' href='" + url + "' download>" + getfileName[i] + "</a>";
+		  						let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+		  						$("."+getTime[i]).append(donwurl);
+		  						$(".mod" + i).detach();
+		  						$("."+getTime[i]).append(createbutton);
+		  						$(".del" + i).detach();
+		  						let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+		  						$("."+getTime[i]).append(deletebutton);
+		  						$(".textnode").css({height:getheight+20 + "px"});
+		  					});
+		  				}
+		  					
+		  				$("#txtdiv" + i).detach();
+		  				
+		  				$(".bodydivtxt").append(div);
+		  				$("#txtdiv" + i).html(texttxt);
+		  				let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+		  				$("."+getTime[i]).append(createbutton);
+		  				let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+		  				$("."+getTime[i]).append(deletebutton);
+		  				if(getheight < $("#txtdiv" + i).height())
+	  					{
+	  						getheight = $("#txtdiv" + i).height();
+	  						$(".textnode").css({height:getheight+20 + "px"});
+	  					}
+				}
+			}
+		}
+		$(".textnode").css({height:getheight+20 + "px"});
+	}
+
+	function modified(num){
+		var txtTitle = document.getElementById("title"+num).innerHTML;
+		txtTime = document.getElementById("txtdiv"+num).getElementsByTagName("h5");
+		var txtText = document.getElementById("txtdiv"+num).getElementsByTagName("p");
+		var txtFile = document.getElementById("txtdiv"+num).getElementsByTagName("a");
+		var texttxt = "";
+		for(var i = 0; i < txtText.length; i++)
+		{
+			texttxt += "<p>" + txtText[i].innerHTML + "</p>";
+		}
+		var text = "<div class='row'>" + "<div class='col-xs-12 col-sm-12'>" + "<input class='col-xs-12 col-sm-12' type='text' name='' id='title'>" + "<textarea name='editor1' id='txt'></textarea>" + "<script>" + "CKEDITOR.replace( 'editor1' );" + "</" + "script>" + "<div class='form-group'>" + "<label for='exampleInputFile'>File input</label>" + "<input type='file' id='exampleInputFile'>" + "<p class='help-block'>Example block-level help text here.</p>" + "</div>" + "<input class='col-xs-12 col-sm-12' placeholder='HashTag #때고 입력하세요' type='text' id='hashtaginput'>" + "<input type='button' class='btn btn-primary' value='수정' onclick='modifiedbutton();'></input>" + "<input type='button' class='btn btn-primary' value='취소'' onclick='get();'></input>" + "</div>";
+
+		$("form").html(text);
+		$(".bodydivtxt").html("");
+
+		document.getElementById("title").value = txtTitle;
+	  	CKEDITOR.instances.txt.setData(texttxt);
+	}
+
+	function modifiedbutton(){
+		var titletxt = document.getElementById("title").value;
+  		var txt = CKEDITOR.instances.txt.getData();
+  		var currentTime = txtTime[0].innerHTML;
+
+  		if(titletxt.length <= 0)
+		{
+			alert("제목을 입력하세요");
+			return;
+		}
+
+		var fileInput = document.getElementById("exampleInputFile");
+
+		var file = fileInput.files[0];
+
+		var storageRef = firebase.storage().ref();
+
+		if(file != null)
+		{
+			var uploadTask = storageRef.child( currentTime + "/" + file.name).put(file);
+			$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/fileName.json",
+  			method : "PUT",
+  			data : JSON.stringify(file.name),
+  			success : function(data) {
+  			}
+  		});
+		}
+
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/Title.json",
+  			method : "PUT",
+  			data : JSON.stringify(titletxt),
+  			success : function(data) {
+  			}
+  		});
+		
+  		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/Text.json",
+  			method : "PUT",
+  			data : JSON.stringify(txt),
+  			success : function(data) {
+  				id = setInterval(load,500);
+  			}
+  		});
+
+
+  		function load(){
+
+		getfileName = new Array();
+		getText = new Array();
+		getTime = new Array();
+		getTitle = new Array();
+		geturl = new Array();
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/.json",
+  			method : "GET",
+  			data : JSON.stringify(txt),
+  			success : function(data) {
+
+  				k = 0;
+  				printObj(data);
+
+	  			var storage = firebase.storage();
+
+	  			let bodydiv = document.createElement("div");
+	  			bodydiv.className = "bodydivtxt row row-eq-height"
+	  			$(".bodydivtxt").detach();
+	  			$("body").append(bodydiv);
+
+	  			for(let i = getTime.length - 1; i >= 0; i--)
+	  			{
+	  				let div = document.createElement("div");
+	  				div.id = "txtdiv" + i;
+	  				div.className = "textnode col-xs-12 col-md-6 panel";
+	  				texttxt = "";
+	  				if(getfileName[i] == null || getfileName[i] == undefined)
+	  				{
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  				}
+	  				else
+	  				{
+
+	  					var donwurl = "";
+	  					var gsReference = storage.refFromURL("gs://fir-34038.appspot.com/" + getTime[i] + "/" + getfileName[i]);
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  					gsReference.getDownloadURL().then(function(url){
+
+	  						donwurl = "<a id='" + getTime[i] + "' href='" + url + "' download>" + getfileName[i] + "</a>";
+
+	  						let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  						$("."+getTime[i]).append(donwurl);
+	  						$(".mod" + i).detach();
+	  						$("."+getTime[i]).append(createbutton);
+	  						$(".del" + i).detach();
+	  						let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  						$("."+getTime[i]).append(deletebutton);
+	  						$(".textnode").css({height:getheight+20 + "px"});
+	  					});
+
+	  				}
+	  					
+
+	  				$("#txtdiv" + i).detach();
+	  				
+	  				$(".bodydivtxt").append(div);
+	  				$("#txtdiv" + i).html(texttxt);
+	  				let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  				$("."+getTime[i]).append(createbutton);
+	  				let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  				$("."+getTime[i]).append(deletebutton);
+
+	  				if(getheight < $("#txtdiv" + i).height())
+	  				{
+	  					getheight = $("#txtdiv" + i).height();
+	  					$(".textnode").css({height:getheight+20 + "px"});
+	  				}
+
+	  			}
+
+  			}
+
+  		});
+  		var hashtag = "<input class='col-xs-12 col-sm-12' placeholder='HashTag #때고 검색하세요' type='text' id='hashtag'>"
+  		var tagbutton = "<input class='hashtagbutton btn btn-primary' type='button' value='검색' onclick='hashtagbutton();'></input>"
+  		var createbutton = "<input class='createbutton btn btn-primary' type='button' value='작성' onclick='create();'></input>"
+  		$("form").html(hashtag+tagbutton+createbutton);
+  		clearInterval(id);
+
+	  		
+	  	}
+	  	//$(".textnode").css({height:getheight + "px"});
+	}
+
+  	function save(){
+  		var titletxt = document.getElementById("title").value;
+  		var txt = CKEDITOR.instances.txt.getData();
+  		var hashtxt = document.getElementById("hashtaginput").value;
+  		var today = new Date();
+  		var month = today.getMonth() + 1;
+  		var date = today.getDate();
+  		var hours = today.getHours();
+  		var min = today.getMinutes();
+  		var sec = today.getSeconds();
+  		getfileName = new Array();
+		getText = new Array();
+		getTime = new Array();
+		getTitle = new Array();
+		geturl = new Array();
+		gethash = new Array();
+  		if(today.getMonth() + 1 < 10)
+  		{
+  			month = "0" + (today.getMonth() + 1);
+  		}
+  		if(today.getDate() < 10)
+  		{
+  			date = "0" + today.getDate();
+  		}
+  		if(today.getHours() < 10)
+  		{
+  			hours = "0" + today.getHours();
+  		}
+  		if(today.getMinutes() < 10)
+  		{
+  			min = "0" + today.getMinutes();
+  		}
+  		if(today.getSeconds() < 10)
+  		{
+  			sec = "0" + today.getSeconds();
+  		}
+		var currentTime =
+		(today.getYear()+1900)+"년"+
+		month+"월"+
+		date+"일"+
+		hours+"시" +
+		min+ "분"+
+		sec+"초";
+
+		var currentDay=
+		(today.getYear()+1900)+"년 "+
+		(today.getMonth()+1)+"월 "+
+		today.getDate()+"일 ";
+
+		if(titletxt.length <= 0)
+		{
+			alert("제목을 입력하세요");
+			return;
+		}
+
+		var metadata = {
+			contentType : "image/jpeg"
+		};
+
+		var fileInput = document.getElementById("exampleInputFile");
+
+		var file = fileInput.files[0];
+
+		var storageRef = firebase.storage().ref();
+
+		if(file != null)
+		{
+			var uploadTask = storageRef.child( currentTime + "/" + file.name).put(file);
+			$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/fileName.json",
+  			method : "PUT",
+  			data : JSON.stringify(file.name),
+  			success : function(data) {
+  			}
+  		});
+		}
+
+		
+
+		var start = 0;
+
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/Title.json",
+  			method : "PUT",
+  			data : JSON.stringify(titletxt),
+  			success : function(data) {
+  			}
+  		});
+
+		if(hashtxt.length > 0)
+  		{
+  			$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/Hash.json",
+  			method : "PUT",
+  			data : JSON.stringify(hashtxt),
+  			success : function(data) {
+  			}
+  			});
+  		}
+		
+  		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/" + currentTime + "/Text.json",
+  			method : "PUT",
+  			data : JSON.stringify(txt),
+  			success : function(data) {
+  				id = setInterval(load,500);
+  			}
+  		});
+
+  		function load(){
+
+
+		getfileName = new Array();
+		getText = new Array();
+		getTime = new Array();
+		getTitle = new Array();
+		geturl = new Array();
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/.json",
+  			method : "GET",
+  			data : JSON.stringify(txt),
+  			success : function(data) {
+
+  				k = 0;
+  				printObj(data);
+
+	  			var storage = firebase.storage();
+
+	  			let bodydiv = document.createElement("div");
+	  			bodydiv.className = "bodydivtxt row row-eq-height"
+	  			$(".bodydivtxt").detach();
+	  			$("body").append(bodydiv);
+
+	  			for(let i = getTime.length - 1; i >= 0; i--)
+	  			{
+	  				let div = document.createElement("div");
+	  				div.id = "txtdiv" + i;
+	  				div.className = "textnode col-xs-12 col-md-6 panel";
+	  				texttxt = "";
+	  				if(getfileName[i] == null || getfileName[i] == undefined)
+	  				{
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  				}
+	  				else
+	  				{
+	  					
+	  					var donwurl = "";
+	  					var gsReference = storage.refFromURL("gs://fir-34038.appspot.com/" + getTime[i] + "/" + getfileName[i]);
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  					gsReference.getDownloadURL().then(function(url){
+
+	  						donwurl = "<a id='" + getTime[i] + "' href='" + url + "' download>" + getfileName[i] + "</a>";
+
+	  						let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  						$("."+getTime[i]).append(donwurl);
+	  						$(".mod" + i).detach();
+	  						$(".del" + i).detach();
+	  						$("."+getTime[i]).append(createbutton);
+	  						let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  						$("."+getTime[i]).append(deletebutton);
+	  						$(".textnode").css({height:getheight+20 + "px"});
+	  					});
+
+	  				}
+	  					
+	  				$("#txtdiv" + i).detach();
+	  				
+	  				$(".bodydivtxt").append(div);
+	  				$("#txtdiv" + i).html(texttxt);
+	  				let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  				
+	  				$("."+getTime[i]).append(createbutton);
+	  				let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  				$("."+getTime[i]).append(deletebutton);
+
+	  				if(getheight < $("#txtdiv" + i).height())
+	  				{
+	  					getheight = $("#txtdiv" + i).height();
+	  					$(".textnode").css({height:getheight+20 + "px"});
+	  				}
+
+	  			}
+
+  			}
+
+  		});
+  		var hashtag = "<input class='col-xs-12 col-sm-12' placeholder='HashTag #때고 검색하세요' type='text' id='hashtag'>"
+  		var tagbutton = "<input class='hashtagbutton btn btn-primary' type='button' value='검색' onclick='hashtag();'></input>"
+  		var createbutton = "<input class='createbutton btn btn-primary' type='button' value='작성' onclick='create();'></input>"
+  		$("form").html(hashtag+tagbutton+createbutton);
+  		clearInterval(id);
+
+	  		
+	  	}
+  		
+  		
+		//$(".textnode").css({height:getheight + "px"});
+
+	}
+	function get(){
+
+		getfileName = new Array();
+		getText = new Array();
+		getTime = new Array();
+		getTitle = new Array();
+		geturl = new Array();
+		gethash = new Array();
+		txt = "";
+		$.ajax({
+  			url : "https://fir-34038.firebaseio.com/.json",
+  			method : "GET",
+  			data : JSON.stringify(txt),
+  			success : function(data) {
+
+  				k = 0;
+  				printObj(data);
+
+	  			var storage = firebase.storage();
+
+	  			let bodydiv = document.createElement("div");
+	  			bodydiv.className = "bodydivtxt row row-eq-height"
+	  			$(".bodydivtxt").detach();
+	  			$("body").append(bodydiv);
+
+	  			for(let i = getTime.length - 1; i >= 0; i--)
+	  			{
+	  				let div = document.createElement("div");
+	  				div.id = "txtdiv" + i;
+	  				div.className = "textnode col-xs-12 col-md-6 panel";
+	  				texttxt = "";
+	  				if(getfileName[i] == null || getfileName[i] == undefined)
+	  				{
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  				}
+	  				else
+	  				{
+
+	  					var donwurl = "";
+	  					var gsReference = storage.refFromURL("gs://fir-34038.appspot.com/" + getTime[i] + "/" + getfileName[i]);
+
+	  					if(gethash[i]==null || gethash[i]==undefined)
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5></div>";
+	  					}
+	  					else
+	  					{
+	  						texttxt = "<div class='" + getTime[i] + "'><h3 id='title" + i + "'>" + getTitle[i] + "</h3>" + getText[i] + "<h5>" + getTime[i] + "</h5><h6>#" + gethash[i] + "</h6></div>";
+	  					}
+	  					gsReference.getDownloadURL().then(function(url){
+
+	  						donwurl = "<a id='" + getTime[i] + "' href='" + url + "' download>" + getfileName[i] + "</a>";
+
+	  						let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  						$("."+getTime[i]).append(donwurl);
+	  						$(".mod" + i).detach();
+	  						$(".del" + i).detach();
+	  						$("."+getTime[i]).append(createbutton);
+	  						let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  						$("."+getTime[i]).append(deletebutton);
+	  						$(".textnode").css({height:getheight+20 + "px"});
+	  					});
+	  				}
+
+	  				$("#txtdiv" + i).detach();
+	  				
+	  				$(".bodydivtxt").append(div);
+	  				$("#txtdiv" + i).html(texttxt);
+	  				let createbutton = "<input class='mod" + i + " btn btn-success' type='button' value='수정' onclick='modified("+ i +");'></input>"
+	  				$("."+getTime[i]).append(createbutton);
+	  				let deletebutton = "<input class='del" + i + " btn btn-success' type='button' value='삭제' onclick='deletenode("+ i +");'></input>"
+	  						$("."+getTime[i]).append(deletebutton);
+	  				
+	  				if(getheight < $("#txtdiv" + i).height())
+	  				{
+	  					getheight = $("#txtdiv" + i).height();
+	  					console.log(getheight);
+	  					$(".textnode").css({height:getheight+20 + "px"});
+	  				}
+	  			}
+  			}
+
+  		});
+  		//console.log(getheight);
+  		//$(".textnode").css({height:getheight + "px"});
+  		var hashtag = "<input class='col-xs-12 col-sm-12' placeholder='HashTag #때고 검색하세요' type='text' id='hashtag'>"
+  		var tagbutton = "<input class='hashtagbutton btn btn-primary' type='button' value='검색' onclick='hashtagbutton();'></input>"
+  		var createbutton = "<input class='createbutton btn btn-primary' type='button' value='작성' onclick='create();'></input>"
+  		$("form").html(hashtag+tagbutton+createbutton);
+	}
+
+	function printObj(obj){
+			var ret = "";
+			if($.type(obj) == "string"){
+
+			}
+			else
+			{
+
+				var i = 0;
+				var j = 0;
+				for(var property in obj){
+					k++;
+					if(property == "fileName")
+					{
+
+						getfileName.push(obj[property]);
+					}
+					else if(property == "Title")
+					{
+
+						getTitle.push(obj[property]);
+					}
+					else if(property == "Text")
+					{
+
+						getText.push(obj[property]);
+					}
+					else if(property == "Hash")
+					{
+						gethash.push(obj[property]);
+					}
+					else
+					{
+						
+						if(getTime.length == getTitle.length)
+						{
+							if(getTime.length != getfileName.length)
+							{
+
+								getfileName.push(null);
+							}
+							if(getTime.length != gethash.length)
+							{
+								gethash.push(null);
+
+							}
+						}
+						else
+						{
+
+						}
+						getTime.push(property);
+					}
+
+					printObj(obj[property]);
+
+					i++;
+				}
+			}
+
+		}
+
+  </script>
+</body>
+</html>
